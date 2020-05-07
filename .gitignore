@@ -1,0 +1,12 @@
+.vs/
+[b|B]in
+[o|O]bj
+packages
+*.dll
+*.jar
+*.exe
+*.bin
+*.user
+!vendor/*
+*.orig
+*.runsettings
