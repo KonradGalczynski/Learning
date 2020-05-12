@@ -17,7 +17,6 @@ namespace Testability
 			// Assert that something ...
 
 			// what about complicated logic inside ImposeContract?
-			// consider adding code for testing?
 		}
 
 		[Fact]
