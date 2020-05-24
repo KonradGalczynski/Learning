@@ -98,65 +98,63 @@ public class MockHttpMessageHandler : HttpMessageHandler
 
 Unit testing of `SomeDataRetriever` is relatively simple. We need to create a mock for `HttpMessageHandler` as there is no possibility to mock `HttpClient`. Our `MockHttpMessageHandler` is returning `HttpResponseMessage` with status code set to 500 (`BadRequest`) so that we can test path for unsuccessful data retrieving. We must do so because we cannot mock the extension method and the actual implementation of `IsSuccess` will be run in this scenario.
 
-<!-- ###################################
-        		public static async Task<JobSummary> RunJobAsync(this IC4RestClient client, JobRequest job, CancellationToken token)
-		{
-			if (client == null)
-			{
-				throw new ArgumentNullException(nameof(client));
-			}
-
-			if (job == null)
-			{
-				throw new ArgumentNullException(nameof(job));
-			}
-
-			var summary = await client.PostJobAsync(job, token);
-
-			while (summary.IsRunning())
-			{
-				await Task.Delay(PollTimeSpan, token);
-				summary = await client.GetJobAsync(summary.Job.Id, token);
-			}
-
-			return summary;
-		}
-################################## -->
 ## Neutral guy
+Neutral guy are just neutral in terms of testability. You can test both extension method and code which is using it on unit level. You can ask what is the difference then between normal guy and good citizen? The difference is that usually it takes more effort to test code which is using normal guys extension methods.
+Example of extension method which behaves like a neutral guy in terms of testability is presented below:
 
-        public static async Task<HttpResponseMessage> GetAsync(this HttpClient client,
-            Uri uri,
-            INameValueCollection additionalHeaders = null,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (uri == null) throw new ArgumentNullException("uri");
+```
+public static async Task<JobSummary> RunJobAsync(this IJobRestClient client, JobRequest job, CancellationToken token)
+{
+    var jobId = await client.PostJobAsync(job, token);
+    var summary = await client.GetJobAsync(jobId, token);
 
-            // GetAsync doesn't let clients to pass in additional headers. So, we are
-            // internally using SendAsync and add the additional headers to requestMessage. 
-            using (HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
-            {
-                if (additionalHeaders != null)
-                {
-                    foreach (string header in additionalHeaders)
-                    {
-                        if (GatewayStoreClient.IsAllowedRequestHeader(header))
-                        {
-                            requestMessage.Headers.TryAddWithoutValidation(header, additionalHeaders[header]);
-                        }
-                    }
-                }
-                return await client.SendHttpAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-            }
-        }
+    while (!summary.IsRunning)
+    {
+        await Task.Delay(TimeSpan.FromMilliseconds(100), token);
+        summary = await client.GetJobAsync(jobId, token);
+    }
 
-########################################
+    return summary;
+}
+```
 
-        		public static IEnumerable<SourceInstanceDto> AsSourceInstanceDtos(this List<RelativityObject> objects)
+It was written to extend `IJobRestClient` which is used to start some jobs in remote location. When job start is requested, job is queued. When resources are available job is transferred to running state. When job finishes execution it is moved to completed state. `IJobRestClient` has only two methods:
+
+- `PostJobAsync` which sends request to start new job
+- `GetJobAsync` to retrieve summary of a job
+This extension method sends request to start new job and returns when job is running (it is waiting for the time when job is queued). It helps simplify client code which is interested only in jobs which are running at the moment.
+
+Let's write some unit tests for it.
+
+```
+[Test]
+public async Task ShouldReturnCorrectSummaryWhenJobIsRunningRightAfterPost()
+{
+    var jobRestClient = Substitute.For<IJobRestClient>();
+    var jobRequest = new JobRequest();
+    var token = CancellationToken.None;
+    const string jobId = "testJobId";
+    jobRestClient.PostJobAsync(jobRequest, token).Returns(jobId);
+    var jobSummary = new JobSummary
+    {
+        IsRunning = true
+    };
+    jobRestClient.GetJobAsync(jobId, token).Returns(jobSummary);
+
+    var result = await jobRestClient.RunJobAsync(jobRequest, token);
+
+    result.Should().Be(jobSummary);
+    await jobRestClient.Received(1).GetJobAsync(jobId, token);
+}
+```
+
+
+        		<!-- public static IEnumerable<SourceInstanceDto> AsSourceInstanceDtos(this List<RelativityObject> objects)
 		{
 			foreach(var obj in objects ?? Enumerable.Empty<RelativityObject>())
 			{
 				yield return GetResponseObject(obj);
 			}
-		}
+		} -->
 
 ## Mighty villain
