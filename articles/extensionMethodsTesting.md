@@ -99,7 +99,7 @@ public class MockHttpMessageHandler : HttpMessageHandler
 Unit testing of `SomeDataRetriever` is relatively simple. We need to create a mock for `HttpMessageHandler` as there is no possibility to mock `HttpClient`. Our `MockHttpMessageHandler` is returning `HttpResponseMessage` with status code set to 500 (`BadRequest`) so that we can test path for unsuccessful data retrieving. We must do so because we cannot mock the extension method and the actual implementation of `IsSuccess` will be run in this scenario.
 
 ## Neutral guy
-Neutral guy are just neutral in terms of testability. You can test both extension method and code which is using it on unit level. You can ask what is the difference then between normal guy and good citizen? The difference is that usually it takes more effort to test code which is using normal guys extension methods.
+Neutral guys are just neutral in terms of testability. You can test both the extension method and code which is using it on the unit level. You can ask what is the difference then between a normal guy and a good citizen? The difference is that usually it takes more effort to test code which is using normal guys extension methods.
 Example of extension method which behaves like a neutral guy in terms of testability is presented below:
 
 ```
@@ -118,11 +118,11 @@ public static async Task<JobSummary> RunJobAsync(this IJobRestClient client, Job
 }
 ```
 
-It was written to extend `IJobRestClient` which is used to start some jobs in remote location. When job start is requested, job is queued. When resources are available job is transferred to running state. When job finishes execution it is moved to completed state. `IJobRestClient` has only two methods:
+It was written to extend `IJobRestClient` which is used to start some jobs in a remote location. When a job start is requested, the job is queued. When resources are available to start a job, it is transferred to a running state. When a job finishes execution it is moved to a completed state. `IJobRestClient` has only two methods:
 
-- `PostJobAsync` which sends request to start new job
-- `GetJobAsync` to retrieve summary of a job
-This extension method sends request to start new job and returns when job is running (it is waiting for the time when job is queued). It helps simplify client code which is interested only in jobs which are running at the moment.
+- `PostJobAsync` which sends a request to start a new job
+- `GetJobAsync` to retrieve a summary of a job
+This extension method sends a request to start a new job and returns when the job is running (it is waiting for the time when the job is queued). It helps simplify client code which is interested only in jobs that are running at the moment.
 
 Let's write some unit tests for it.
 
@@ -147,14 +147,52 @@ public async Task ShouldReturnCorrectSummaryWhenJobIsRunningRightAfterPost()
     await jobRestClient.Received(1).GetJobAsync(jobId, token);
 }
 ```
+As you can see testing this extension method is not difficult. We are creating mock for the extended interface, create input data, execute the extension method, and assert on results. Nothing fancy here. Let's move to client code which is using this extension method.
 
+```
+public class ReportingJobRunner
+{
+    private readonly IJobRestClient _jobRestClient;
+    private readonly IReportingSink _reportingSink;
 
-        		<!-- public static IEnumerable<SourceInstanceDto> AsSourceInstanceDtos(this List<RelativityObject> objects)
-		{
-			foreach(var obj in objects ?? Enumerable.Empty<RelativityObject>())
-			{
-				yield return GetResponseObject(obj);
-			}
-		} -->
+    public ReportingJobRunner(IJobRestClient jobRestClient, IReportingSink reportingSink)
+    {
+        _jobRestClient = jobRestClient;
+        _reportingSink = reportingSink;
+    }
+
+    public async Task RunJobAsync(JobRequest job, CancellationToken token)
+    {
+        var summary = await _jobRestClient.RunJobAsync(job, token);
+        _reportingSink.Report(summary);
+    }
+}
+```
+This is a very simple decorator for `IJobRestClient` which apart from running a job with extension method reports its status to some sink (for example remote network location). Unit testing for such a simple decorator should be pretty easy, yes? It is not so easy as the extension method `RunJobAsync` cannot be mocked. The only solution for this is to mock `IJobRestClient` in a way that guarantees expected `RunJobAsync` behavior. Having that said let's write a unit test that checks if a proper summary is reported.
+
+```
+[Test]
+public async Task ShouldReportJobSummaryToGivenSink()
+{
+    var jobRestClient = Substitute.For<IJobRestClient>();
+    var reportingSink = Substitute.For<IReportingSink>();
+    var uut = new ReportingJobRunner(jobRestClient, reportingSink);
+    var jobRequest = new JobRequest();
+    var token = CancellationToken.None;
+    const string jobId = "testJobId";
+    jobRestClient.PostJobAsync(jobRequest, token).Returns(jobId);
+    var jobSummary = new JobSummary
+    {
+        IsRunning = true
+    };
+    jobRestClient.GetJobAsync(jobId, token).Returns(jobSummary);
+
+    await uut.RunJobAsync(jobRequest, token);
+
+    reportingSink.Received(1).Report(jobSummary);
+}
+```
+
+Interestingly, the code inside the test is far more complicated than the code itself even though the tested method has two lines of code. The fact that it is not possible to mock the extension method is the reason for such a situation. To mock the behavior of `RunJobAsync` we need to know how it is implemented (we must take a look at its implementation). Then we must mock extended type `IJobRestClient` accordingly to have control over how our code behaves in the test. One thing to mention is that test code for testing `ReportingJobRunner` is very similar to test code for testing `RunJobAsync` extension method as we need to set up the same behavior for mocked extended type.
 
 ## Mighty villain
