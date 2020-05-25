@@ -12,7 +12,7 @@ When we read guidelines of extension methods we usually see much information:
 - in which namespace they should be put
 - how to be prepared for changing contracts of an extended type
 
-However one aspect of extension methods is often omitted - testability. One thing is the testability extension method on the unit level. The second thing is the testability of the code which is using an extension method. In the following paragraphs I will explain to you what impact can extension method has on the testability of your code on a unit level. I have divided extension methods into three buckets: good citizens, neutral guys and mighty villains. Lets meet these guys.
+However one aspect of extension methods is often omitted - testability. One thing is the testability extension method on the unit level. The second thing is the testability of the code which is using an extension method. In the following paragraphs I will explain to you what impact can extension method has on the testability of your code on a unit level. I have divided extension methods into three buckets: good citizens, neutral guys, and mighty villains. Let's meet these guys.
 
 ## Good citizen
 Extension methods which are good citizens are easy to unit test. What is more the code which is using them is also easy to test on the unit level. So let's take a look at the example of good citizens.
