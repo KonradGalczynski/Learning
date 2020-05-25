@@ -196,3 +196,70 @@ public async Task ShouldReportJobSummaryToGivenSink()
 Interestingly, the code inside the test is far more complicated than the code itself even though the tested method has two lines of code. The fact that it is not possible to mock the extension method is the reason for such a situation. To mock the behavior of `RunJobAsync` we need to know how it is implemented (we must take a look at its implementation). Then we must mock extended type `IJobRestClient` accordingly to have control over how our code behaves in the test. One thing to mention is that test code for testing `ReportingJobRunner` is very similar to test code for testing `RunJobAsync` extension method as we need to set up the same behavior for mocked extended type.
 
 ## Mighty villain
+
+Now it is time to meet them. Mighty villains. Extension method which are hard or impossible to test and which makes client code very hard or impossible to test on a unit level. There is an example of the villain extension method presented below.
+
+```
+public static IStorageClient GetHttpStorageClient(this IHttpClientFactory httpClientFactory, Options options)
+{
+    var clientBootstrapper = new Bootstrapper(httpClientFactory);
+    return clientBootstrapper.CreateHttpStorageClient(options);
+}
+```
+
+This method extends `IHttpClientFactory` so that HttpStorageClient can be created. Even though this method has only two lines what makes it mighty villain is the first line of its body - the line in which a new operator is used. `Bootstrapper` is not injected but created inside the extension method and this leads to problems with testing this method and impossibility to test client code which is using this method. The only unit test for this method which we can write is presented below.
+
+```
+public void ShouldCreateHttpStorageClientWhenRequested()
+{
+    var httpClientFactory = Substitute.For<IHttpClientFactory>();
+    var options = new Options
+    {
+        CorrelationIdProvider = () => Guid.NewGuid().ToString(),
+        UseDefaultLogging = true
+    };
+
+    var result = httpClientFactory.GetHttpStorageClient(options);
+
+    result.Should().BeOfType<HttpStorageClient>();
+    result.Should().BeAssignableTo<IStorageClient>();
+}
+```
+
+We can only assert the type of returned object. We cannot check if options were correctly passed or if an extended HTTP client factory was called at all during the process of httpStorageClient creation. Despite having 100% code coverage we do not know if our extension method behaves correctly.
+Let's now move to the code of a class that is using this extension method.
+
+```
+public class HttpDataRetriever
+{
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    public HttpDataRetriever(IHttpClientFactory httpClientFactory)
+    {
+        _httpClientFactory = httpClientFactory;
+    }
+
+    public Data GetData()
+    {
+        var options = new Options
+        {
+            UseDefaultLogging = false
+        };
+        var httpStorageClient = _httpClientFactory.GetHttpStorageClient(options);
+        return httpStorageClient.ReadAll();
+    }
+}
+```
+
+Unit testing `GetHttpStorageClient` extension method was hard and the test had some limitations. But unit testing code which is using `GetHttpStorageClient` is impossible. We cannot mock the creation of `Bootstrapper` object as it is created directly in the extension method body. By writing `GetHttpStorageClient` is presented the way we impacted unit testing of every single client codebase which will be using it. This impact is huge and negative. `GetHttpStorageClient` is mighty villain indeed.
+
+## Wrap up
+
+You have seen some examples of extension methods, how they can be tested, and how they impact testability of code in which they are consumed. If you want to write extension methods which are always good citizens following rules are for you:
+
+- keep your extension methods simple - they should not be complicated
+- create extension methods to enrich types not to alter their behavior
+- do not create a new object inside extension methods
+- remember about code which will be using it - if you will be able to unit test it means you've done a great job
+
+Happy extending and testing!
