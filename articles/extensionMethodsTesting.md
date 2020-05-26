@@ -1,6 +1,6 @@
-## C# extension methods and testability - untold story
+## C# extension methods and testability - the untold story
 
-Extension methods are really cool feature in C# since they were introduced in C# 3.0. They are extremely useful as they enable us to add functionality to existing types without creating derived types, recompiling existing types, and even modifying them. Even though they are static methods they can be called in the same way as if they were instance methods. Typical scenarios when we would like to use them are:
+Extension methods are a really cool feature in C# since they were introduced in C# 3.0. They are extremely useful as they enable us to add functionality to existing types without creating derived types, recompiling existing types, and even modifying them. Even though they are static methods they can be called in the same way as if they were instance methods. Typical scenarios when we would like to use them are:
 
 - adding functionalities to collections
 - adding functionalities to Domain Entities or Data Transfer Objects
@@ -39,7 +39,7 @@ public void ShouldCorrectlyDecideWhetherHttpStatusCodeIsSuccessful(HttpStatusCod
     result.Should().Be(expectedResult);
 }
 ```
-Unit test for `IsSuccess` extension method is very simple and easy to write. Let's have a look a the testability of the code that uses the `IsSuccess` extension method. Below there is a very simple class with one public method which uses the `IsSuccess` extension method. This method is used to retrieve some data over the network. In the case of unsuccessfully response error is logged and an empty object with data is returned. Please bear in mind that this implementation is oversimplified to show the testability aspect.
+The unit test for the `IsSuccess` extension method is very simple and easy to write. Let's have a look a the testability of the code that uses the `IsSuccess` extension method. Below there is a very simple class with one public method which uses the `IsSuccess` extension method. This method is used to retrieve some data over the network. In the case of unsuccessfully response error is logged and an empty object with data is returned. Please bear in mind that this implementation is oversimplified to show the testability aspect.
 
 ```
 public class SomeDataRetriever
@@ -67,7 +67,7 @@ public class SomeDataRetriever
 }
 ```
 
-To test this class on the unit level we need to mock both `HttpClient` and `ILogger`. You cannot mock `IsSuccess` method so despite the fact we are testing `SomeDataRetriever` on a unit level we will be also testing the behavior of the `IsSuccess` method. We need to know this trait of extension methods - when classes that use extension methods are unit tested not only the logic of these classes are tested. Extension methods logic is also tested. As a result unit tests for class consuming extension methods can fail and the reason for this could be an error in extension method implementation. This is one of the negative impacts of extension methods on the testability of the classes that use them. Having that said let's write a unit test for unsuccessfully retrieving data with `SomeDataRetriever`.
+To test this class on the unit level we need to mock both `HttpClient` and `ILogger`. You cannot mock the `IsSuccess` method so despite the fact we are testing `SomeDataRetriever` on a unit level we will be also testing the behavior of the `IsSuccess` method. We need to know this trait of extension methods - when classes that use extension methods are unit tested not only the logic of these classes are tested. Extension methods logic is also tested. As a result unit tests for class consuming extension methods can fail and the reason for this could be an error in extension method implementation. This is one of the negative impacts of extension methods on the testability of the classes that use them. Having that said let's write a unit test for unsuccessfully retrieving data with `SomeDataRetriever`.
 
 ```
 [Test]
@@ -147,7 +147,7 @@ public async Task ShouldReturnCorrectSummaryWhenJobIsRunningRightAfterPost()
     await jobRestClient.Received(1).GetJobAsync(jobId, token);
 }
 ```
-As you can see testing this extension method is not difficult. We are creating mock for the extended interface, create input data, execute the extension method, and assert on results. Nothing fancy here. Let's move to client code that uses this extension method.
+As you can see testing this extension method is not difficult. We are creating mock for the extended interface, create input data, execute the extension method, and assert on results. Nothing fancy here. Let's move to the client code that uses this extension method.
 
 ```
 public class ReportingJobRunner
@@ -197,7 +197,7 @@ Interestingly, the code inside the test is far more complicated than the code it
 
 ## Mighty villain
 
-Now it is time to meet them. Mighty villains. Extension methods which are hard or impossible to test and which makes client code very hard or impossible to test on a unit level. There is an example of the villain extension method presented below.
+Now it is time to meet them. Mighty villains. Extension methods are hard or impossible to test and which makes client code very hard or impossible to test on a unit level. There is an example of the villain extension method presented below.
 
 ```
 public static IStorageClient GetHttpStorageClient(this IHttpClientFactory httpClientFactory, Options options)
@@ -228,7 +228,7 @@ public void ShouldCreateHttpStorageClientWhenRequested()
 
 We can only assert the type of returned object. We cannot check if options were correctly passed or if an extended HTTP client factory was called at all during the process of httpStorageClient creation. Despite having 100% code coverage we do not know if our extension method behaves correctly. Defects which can slip through are serious:
 
-- we cannot check if we use correct logging. Imagine a situation that you were sure that custom logging was used in your solution but someone changed `UseDefaultLogging` to true for testing purposes and pushed this code to production. Now you client is calling that he wired a transfer but do not see money on receiving end. You are logging into system and see no logs and do not know what happened and how to explain it to your client. And you could catch this problem by proper unit testing of `GetHttpStorageClient` extension method.
+- we cannot check if we use correct logging. Imagine a situation that you were sure that custom logging was used in your solution but someone changed `UseDefaultLogging` to true for testing purposes and pushed this code to production. Now your client is calling that he wired a transfer but do not see money on receiving end. You are logging into the system and see no logs and do not know what happened and how to explain it to your client. And you could catch this problem by proper unit testing of the `GetHttpStorageClient` extension method.
 - we cannot be sure that we will correctly fill in correlation id in requests and have problems with troubleshooting when code is running in production.
 Let's now move to the code of a class that is using this extension method.
 
@@ -254,7 +254,7 @@ public class HttpDataRetriever
 }
 ```
 
-Unit testing `GetHttpStorageClient` extension method was hard and the test had some limitations. But unit testing code that uses `GetHttpStorageClient` is impossible. We cannot mock the creation of `Bootstrapper` object as it is created directly in the extension method body. Current implementation of `GetHttpStorageClient` makes unit testing of its consumers impossible. Imagine a situation in `GetHttpStorageClient` is used in several other components. Now you do not have only one place which is hard to test. You have several different components which cannot be tested and defects can slip through very easily.
+Unit testing `GetHttpStorageClient` extension method was hard and the test had some limitations. But unit testing code that uses `GetHttpStorageClient` is impossible. We cannot mock the creation of `Bootstrapper` object as it is created directly in the extension method body. Current implementation of `GetHttpStorageClient` makes unit testing of its consumers impossible. Imagine a situation in `GetHttpStorageClient` is used in several other components. Now you do not have only one place which is hard to test. You have several different components that cannot be tested and defects can slip through very easily.
 Mighty villain achieved it only with one line of code!
 
 ## Wrap up
@@ -262,7 +262,7 @@ Mighty villain achieved it only with one line of code!
 You have seen some examples of extension methods, how they can be tested, and how they impact testability of a code in which they are consumed. If you want to write extension methods which are always good citizens following rules are for you:
 
 - keep your extension methods simple - they should not be complicated
-- remember that extension method cannot be mocked - unit tests for class which is using it will test both this class logic and extension method's logic
+- remember that the extension method cannot be mocked - unit tests for a class which is using it will test both this class logic and extension method's logic
 - create extension methods to enrich types not to alter their behavior
 - do not create a new object inside extension methods
 - remember about code which will be using it - if you will be able to unit test it means you've done a great job
