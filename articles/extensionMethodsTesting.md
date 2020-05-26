@@ -2,7 +2,7 @@
 
 Extension methods are really cool feature in C# since they were introduced in C# 3.0. They are extremely useful as they enable us to add functionality to existing types without creating derived types, recompiling existing types, and even modifying them. Even though they are static methods they can be called in the same way as if they were instance methods. Typical scenarios when we would like to use them are:
 
-- adding functionality to collections
+- adding functionalities to collections
 - adding functionalities to Domain Entities or Data Transfer Objects
 - adding functionalities to predefined system types
 
@@ -197,7 +197,7 @@ Interestingly, the code inside the test is far more complicated than the code it
 
 ## Mighty villain
 
-Now it is time to meet them. Mighty villains. Extension method which are hard or impossible to test and which makes client code very hard or impossible to test on a unit level. There is an example of the villain extension method presented below.
+Now it is time to meet them. Mighty villains. Extension methods which are hard or impossible to test and which makes client code very hard or impossible to test on a unit level. There is an example of the villain extension method presented below.
 
 ```
 public static IStorageClient GetHttpStorageClient(this IHttpClientFactory httpClientFactory, Options options)
@@ -255,7 +255,7 @@ Unit testing `GetHttpStorageClient` extension method was hard and the test had s
 
 ## Wrap up
 
-You have seen some examples of extension methods, how they can be tested, and how they impact testability of code in which they are consumed. If you want to write extension methods which are always good citizens following rules are for you:
+You have seen some examples of extension methods, how they can be tested, and how they impact testability of a code in which they are consumed. If you want to write extension methods which are always good citizens following rules are for you:
 
 - keep your extension methods simple - they should not be complicated
 - create extension methods to enrich types not to alter their behavior
