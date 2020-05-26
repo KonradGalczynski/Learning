@@ -1,4 +1,4 @@
-## Missing aspect
+## C# extension methods and testability - untold story
 
 Extension methods are really cool feature in C# since they were introduced in C# 3.0. They are extremely useful as they enable us to add functionality to existing types without creating derived types, recompiling existing types, and even modifying them. Even though they are static methods they can be called in the same way as if they were instance methods. Typical scenarios when we would like to use them are:
 
@@ -15,7 +15,7 @@ When we read guidelines of extension methods we usually see much information:
 However one aspect of extension methods is often omitted - testability. One thing is the testability extension method on the unit level. The second thing is the testability of the code that uses an extension method. In the following paragraphs I will show you how extension methods impact testability. I have divided extension methods into three buckets: good citizens, neutral guys, and mighty villains. Let's meet these guys.
 
 ## Good citizen
-Extension methods which are good citizens are easy to unit test. What is more the code that uses them is also easy to test on the unit level. So let's take a look at the example of good citizens.
+It is very easy to test extension methods which are good citizens. What is more the code that uses them is also easy to test on the unit level. So let's take a look at the example of good citizens.
 The first extension method is checking whether the HTTP status code indicates success or not.
 
 ```
@@ -25,7 +25,7 @@ internal static bool IsSuccess(this HttpStatusCode httpStatusCode)
 }
 ```
 
-In order to test this method on unit level we can write following test:
+You can write following test to test this method on unit level:
 
 ```
 [TestCase(HttpStatusCode.SwitchingProtocols, false)]
@@ -67,7 +67,7 @@ public class SomeDataRetriever
 }
 ```
 
-To test this class on the unit level we need to mock both `HttpClient` and `ILogger`. `IsSuccess` method cannot be mocked so despite the fact we are testing `SomeDataRetriever` on a unit level we will be also testing the behavior of the `IsSuccess` method. We need to know this trait of extension methods - when classes that use extension methods are unit tested not only the logic of these classes are tested. Extension methods logic is also tested. As a result unit tests for class consuming extension methods can fail and the reason for this could be an error in extension method implementation. This is one of the negative impacts of extension methods on the testability of the classes that use them. Having that said let's write a unit test for unsuccessfully retrieving data with `SomeDataRetriever`.
+To test this class on the unit level we need to mock both `HttpClient` and `ILogger`. You cannot mock `IsSuccess` method so despite the fact we are testing `SomeDataRetriever` on a unit level we will be also testing the behavior of the `IsSuccess` method. We need to know this trait of extension methods - when classes that use extension methods are unit tested not only the logic of these classes are tested. Extension methods logic is also tested. As a result unit tests for class consuming extension methods can fail and the reason for this could be an error in extension method implementation. This is one of the negative impacts of extension methods on the testability of the classes that use them. Having that said let's write a unit test for unsuccessfully retrieving data with `SomeDataRetriever`.
 
 ```
 [Test]
@@ -118,7 +118,7 @@ public static async Task<JobSummary> RunJobAsync(this IJobRestClient client, Job
 }
 ```
 
-It was written to extend `IJobRestClient` which is used to start some jobs in a remote location. When a job start is requested, the job is queued. When resources are available to start a job, it is transferred to a running state. When a job finishes execution it is moved to a completed state. `IJobRestClient` has only two methods:
+It extends `IJobRestClient` which is used to start some jobs in a remote location. When a job start is requested, the job is queued. When resources are available to start a job, it is transferred to a running state. When a job finishes execution it is moved to a completed state. `IJobRestClient` has only two methods:
 
 - `PostJobAsync` which sends a request to start a new job
 - `GetJobAsync` to retrieve a summary of a job
@@ -168,7 +168,7 @@ public class ReportingJobRunner
     }
 }
 ```
-`ReportingJobRunner` run job using `IJobRestClient` and then reports summary to provided sink. Unit testing for such a simple decorator should be pretty easy, yes? It is not so easy as the extension method `RunJobAsync` cannot be mocked. The only solution for this is to mock `IJobRestClient` in a way that guarantees expected `RunJobAsync` behavior. Having that said let's write a unit test that checks if a proper summary is reported.
+`ReportingJobRunner` run job using `IJobRestClient` and then reports summary to provided sink. Unit testing for such a simple decorator should be pretty easy, yes? In fact it is not so easy as the extension method `RunJobAsync` cannot be mocked. The only solution for this is to mock `IJobRestClient` in a way that guarantees expected `RunJobAsync` behavior. Having that said let's write a unit test that checks if a proper summary is reported.
 
 ```
 [Test]
@@ -216,7 +216,7 @@ public void ShouldCreateHttpStorageClientWhenRequested()
     var options = new Options
     {
         CorrelationIdProvider = () => Guid.NewGuid().ToString(),
-        UseDefaultLogging = true
+        UseDefaultLogging = false
     };
 
     var result = httpClientFactory.GetHttpStorageClient(options);
@@ -226,7 +226,10 @@ public void ShouldCreateHttpStorageClientWhenRequested()
 }
 ```
 
-We can only assert the type of returned object. We cannot check if options were correctly passed or if an extended HTTP client factory was called at all during the process of httpStorageClient creation. Despite having 100% code coverage we do not know if our extension method behaves correctly.
+We can only assert the type of returned object. We cannot check if options were correctly passed or if an extended HTTP client factory was called at all during the process of httpStorageClient creation. Despite having 100% code coverage we do not know if our extension method behaves correctly. Defects which can slip through are serious:
+
+- we cannot check if we use correct logging. Imagine a situation that you were sure that custom logging was used in your solution but someone changed `UseDefaultLogging` to true for testing purposes and pushed this code to production. Now you client is calling that he wired a transfer but do not see money on receiving end. You are logging into system and see no logs and do not know what happened and how to explain it to your client. And you could catch this problem by proper unit testing of `GetHttpStorageClient` extension method.
+- we cannot be sure that we will correctly fill in correlation id in requests and have problems with troubleshooting when code is running in production.
 Let's now move to the code of a class that is using this extension method.
 
 ```
@@ -251,13 +254,15 @@ public class HttpDataRetriever
 }
 ```
 
-Unit testing `GetHttpStorageClient` extension method was hard and the test had some limitations. But unit testing code that uses `GetHttpStorageClient` is impossible. We cannot mock the creation of `Bootstrapper` object as it is created directly in the extension method body. Current implementation of `GetHttpStorageClient` makes unit testing of its consumers impossible. This impact is huge and negative. `GetHttpStorageClient` is mighty villain indeed.
+Unit testing `GetHttpStorageClient` extension method was hard and the test had some limitations. But unit testing code that uses `GetHttpStorageClient` is impossible. We cannot mock the creation of `Bootstrapper` object as it is created directly in the extension method body. Current implementation of `GetHttpStorageClient` makes unit testing of its consumers impossible. Imagine a situation in `GetHttpStorageClient` is used in several other components. Now you do not have only one place which is hard to test. You have several different components which cannot be tested and defects can slip through very easily.
+Mighty villain achieved it only with one line of code!
 
 ## Wrap up
 
 You have seen some examples of extension methods, how they can be tested, and how they impact testability of a code in which they are consumed. If you want to write extension methods which are always good citizens following rules are for you:
 
 - keep your extension methods simple - they should not be complicated
+- remember that extension method cannot be mocked - unit tests for class which is using it will test both this class logic and extension method's logic
 - create extension methods to enrich types not to alter their behavior
 - do not create a new object inside extension methods
 - remember about code which will be using it - if you will be able to unit test it means you've done a great job
