@@ -2,9 +2,9 @@
 
 namespace ScheduleWebApiRefitContract
 {
-	public class ScheduleEntry
+	public class WorkloadItem
 	{
 		public Guid Identifier { get; set; }
-		public int Order { get; set; }
+		public int DurationInHours { get; set; }
 	}
 }

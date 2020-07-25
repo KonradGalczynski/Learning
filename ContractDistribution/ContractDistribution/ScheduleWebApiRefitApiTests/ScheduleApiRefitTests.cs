@@ -1,12 +1,20 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ContractDistribution;
+using ContractDistribution.Controllers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Refit;
 using ScheduleWebApiRefitContract;
+using TddEbook.TddToolkit;
+using WireMock.RequestBuilders;
+using WireMock.ResponseBuilders;
+using WireMock.Server;
 using Xunit;
 
 namespace ScheduleWebApiRefitApiTests
@@ -14,12 +22,14 @@ namespace ScheduleWebApiRefitApiTests
 	public class ScheduleApiRefitTests : IDisposable
 	{
 		private readonly CancellationTokenSource _cts;
+		private readonly WireMockServer _mockServer;
 		private const string ScheduleWebApiBaseUrl = "http://localhost:3333";
 
 		public ScheduleApiRefitTests()
 		{
 			string[] args = { };
 			_cts = new CancellationTokenSource();
+			_mockServer = WireMockServer.Start(5678);
 			Task.Run(() => CreateHostBuilder(args).Build().Run(), _cts.Token);
 		}
 
@@ -28,6 +38,14 @@ namespace ScheduleWebApiRefitApiTests
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
 					webBuilder.UseStartup<Startup>();
+					webBuilder.ConfigureAppConfiguration(builder =>
+					{
+						var configurationOverrides = new List<KeyValuePair<string, string>>
+						{
+							new KeyValuePair<string, string>("ServiceLocatorBaseAddress", "http://localhost:5678")
+						};
+						builder.AddInMemoryCollection(configurationOverrides);
+					});
 					webBuilder.UseUrls(ScheduleWebApiBaseUrl);
 				});
 
@@ -35,8 +53,28 @@ namespace ScheduleWebApiRefitApiTests
 		public async Task ShouldCreateScheduleWhenRequested()
 		{
 			var scheduleWebAPi = RestService.For<IScheduleWebApi>(ScheduleWebApiBaseUrl);
+			var workloadItems = new List<WorkloadItem>
+			{
+				Any.InstanceOf<WorkloadItem>(),
+				Any.InstanceOf<WorkloadItem>()
+			};
+			
+			var maintenanceWindowServiceLocation = new ServiceLocation
+			{
+				Location = new Uri("http://localhost:5678")
+			};
+			_mockServer.Given(
+				Request.Create().UsingGet().WithPath("/MaintenanceWindowService"))
+				.RespondWith(
+					Response.Create().WithSuccess().WithBodyAsJson(maintenanceWindowServiceLocation));
+			
+			var maintenanceWindows = Any.InstanceOf<MaintenanceWindow>();
+			_mockServer.Given(
+				Request.Create().UsingGet().WithPath("/Planned"))
+				.RespondWith(
+					Response.Create().WithSuccess().WithBodyAsJson(maintenanceWindows));
 
-			var result = await scheduleWebAPi.CreateSchedule();
+			var result = await scheduleWebAPi.CreateScheduleAsync(workloadItems);
 
 			result.Should().NotBe(Guid.Empty);
 		}
@@ -45,16 +83,54 @@ namespace ScheduleWebApiRefitApiTests
 		public async Task ShouldRetrieveCreatedSchedule()
 		{
 			var scheduleWebAPi = RestService.For<IScheduleWebApi>(ScheduleWebApiBaseUrl);
-			var scheduleId = await scheduleWebAPi.CreateSchedule();
+			var workloadItems = new List<WorkloadItem>
+			{
+				new WorkloadItem
+				{
+					Identifier = Guid.NewGuid(),
+					DurationInHours = 7
+				},
+				new WorkloadItem
+				{
+					Identifier = Guid.NewGuid(),
+					DurationInHours = 3
+				}
+			};
 
-			var result = await scheduleWebAPi.GetScheduleById(scheduleId);
+			var maintenanceWindowServiceLocation = new ServiceLocation
+			{
+				Location = new Uri("http://localhost:5678")
+			};
+			_mockServer.Given(
+					Request.Create().UsingGet().WithPath("/MaintenanceWindowService"))
+				.RespondWith(
+					Response.Create().WithSuccess().WithBodyAsJson(maintenanceWindowServiceLocation));
 
-			result.Should().BeEmpty();
+			var maintenanceWindows = new MaintenanceWindow
+			{
+				LengthInHours = 5
+			};
+			_mockServer.Given(
+					Request.Create().UsingGet().WithPath("/Planned"))
+				.RespondWith(
+					Response.Create().WithSuccess().WithBodyAsJson(maintenanceWindows));
+
+			var scheduleId = await scheduleWebAPi.CreateScheduleAsync(workloadItems);
+
+			var result = await scheduleWebAPi.GetScheduleByIdAsync(scheduleId);
+
+			result.Count.Should().Be(2);
+			result.Should().Contain(x => x.Identifier == workloadItems[0].Identifier &&
+			                             x.Order == 2);
+			result.Should().Contain(x => x.Identifier == workloadItems[1].Identifier &&
+			                             x.Order == 1);
 		}
 
 		public void Dispose()
 		{
 			_cts.Cancel();
+			_mockServer.Stop();
+			_mockServer.Dispose();
 		}
 	}
 }

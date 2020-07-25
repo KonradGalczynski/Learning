@@ -1,3 +1,4 @@
+using ContractDistribution.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -19,6 +20,8 @@ namespace ContractDistribution
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddControllers();
+			services.AddHttpClient();
+			services.AddSingleton<IScheduleStorage, ScheduleStorage>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

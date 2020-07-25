@@ -8,9 +8,9 @@ namespace ScheduleWebApiRefitContract
 	public interface IScheduleWebApi
 	{
 		[Post("/api/schedule")]
-		Task<Guid> CreateSchedule();
+		Task<Guid> CreateScheduleAsync(List<WorkloadItem> workloadItems);
 
 		[Get("/api/schedule/{scheduleId}")]
-		Task<List<ScheduleEntry>> GetScheduleById(Guid scheduleId);
+		Task<List<ScheduleEntry>> GetScheduleByIdAsync(Guid scheduleId);
 	}
 }
