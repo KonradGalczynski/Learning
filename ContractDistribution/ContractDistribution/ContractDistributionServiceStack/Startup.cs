@@ -1,25 +1,24 @@
-using ContractDistributionRefit.Controllers;
+using ContractDistributionServiceStack.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ServiceStack;
 
-namespace ContractDistributionRefit
+namespace ContractDistributionServiceStack
 {
-	public class Startup
+	public class Startup : ModularStartup
 	{
 		public Startup(IConfiguration configuration)
 		{
 			Configuration = configuration;
 		}
 
-		public IConfiguration Configuration { get; }
 
 		// This method gets called by the runtime. Use this method to add services to the container.
-		public void ConfigureServices(IServiceCollection services)
+		public new void ConfigureServices(IServiceCollection services)
 		{
-			services.AddControllers();
 			services.AddHttpClient();
 			services.AddSingleton<IScheduleStorage, ScheduleStorage>();
 		}
@@ -34,13 +33,9 @@ namespace ContractDistributionRefit
 
 			app.UseHttpsRedirection();
 
-			app.UseRouting();
-
-			app.UseAuthorization();
-
-			app.UseEndpoints(endpoints =>
+			app.UseServiceStack(new AppHost
 			{
-				endpoints.MapControllers();
+				AppSettings = new NetCoreAppSettings(Configuration)
 			});
 		}
 	}

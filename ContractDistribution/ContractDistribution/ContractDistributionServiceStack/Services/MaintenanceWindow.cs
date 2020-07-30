@@ -1,4 +1,4 @@
-﻿namespace ContractDistributionRefit.Controllers
+﻿namespace ContractDistributionServiceStack.Services
 {
 	public class MaintenanceWindow
 	{

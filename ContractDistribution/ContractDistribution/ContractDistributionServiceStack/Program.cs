@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using ServiceStack;
 
-namespace ContractDistributionRefit
+namespace ContractDistributionServiceStack
 {
 	public class Program
 	{
@@ -14,7 +15,7 @@ namespace ContractDistributionRefit
 			Host.CreateDefaultBuilder(args)
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
-					webBuilder.UseStartup<Startup>();
+					webBuilder.UseModularStartup<Startup>();
 				});
 	}
 }
