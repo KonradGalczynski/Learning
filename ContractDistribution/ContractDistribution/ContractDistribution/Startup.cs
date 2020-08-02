@@ -22,6 +22,7 @@ namespace ContractDistributionRefit
 			services.AddControllers();
 			services.AddHttpClient();
 			services.AddSingleton<IScheduleStorage, ScheduleStorage>();
+			services.AddSwaggerDocument();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -42,6 +43,9 @@ namespace ContractDistributionRefit
 			{
 				endpoints.MapControllers();
 			});
+
+			app.UseOpenApi();
+			app.UseSwaggerUi3();
 		}
 	}
 }
