@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-	  "ContractDistribution": {
+	  "ContractDistributionRefit": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "api/schedule",

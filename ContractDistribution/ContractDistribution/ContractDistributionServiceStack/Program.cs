@@ -13,9 +13,9 @@ namespace ContractDistributionServiceStack
 
 		public static IHostBuilder CreateHostBuilder(string[] args) =>
 			Host.CreateDefaultBuilder(args)
-				.ConfigureWebHostDefaults(webBuilder =>
+				.ConfigureWebHostDefaults(builder =>
 				{
-					webBuilder.UseModularStartup<Startup>();
+					builder.UseModularStartup<Startup>();
 				});
-	}
+    }
 }

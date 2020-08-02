@@ -2,29 +2,29 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using ContractDistributionRefit;
-using ContractDistributionRefit.Controllers;
+using ContractDistributionServiceStack;
+using ContractDistributionServiceStack.Services;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Refit;
-using ScheduleWebApiRefitContract;
+using ScheduleWebApiServiceStackContract;
+using ServiceStack;
 using TddEbook.TddToolkit;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 using Xunit;
 
-namespace ScheduleWebApiRefitApiTests
+namespace ScheduleWebApiServiceStackApiTests
 {
-	public class ScheduleApiRefitTests : IDisposable
+	public class ScheduleApiServiceStackTests : IDisposable
 	{
 		private readonly CancellationTokenSource _cts;
 		private readonly WireMockServer _mockServer;
 		private const string ScheduleWebApiBaseUrl = "http://localhost:3333";
 
-		public ScheduleApiRefitTests()
+		public ScheduleApiServiceStackTests()
 		{
 			string[] args = { };
 			_cts = new CancellationTokenSource();
@@ -36,7 +36,7 @@ namespace ScheduleWebApiRefitApiTests
 			Host.CreateDefaultBuilder(args)
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
-					webBuilder.UseStartup<Startup>();
+					webBuilder.UseModularStartup<Startup>();
 					webBuilder.ConfigureAppConfiguration(builder =>
 					{
 						var configurationOverrides = new List<KeyValuePair<string, string>>
@@ -51,13 +51,8 @@ namespace ScheduleWebApiRefitApiTests
 		[Fact]
 		public async Task ShouldCreateScheduleWhenRequested()
 		{
-			var scheduleWebAPi = RestService.For<IScheduleWebApi>(ScheduleWebApiBaseUrl);
-			var workloadItems = new List<WorkloadItem>
-			{
-				Any.InstanceOf<WorkloadItem>(),
-				Any.InstanceOf<WorkloadItem>()
-			};
-			
+			var scheduleWebApiClient = new JsonServiceClient(ScheduleWebApiBaseUrl);
+
 			var maintenanceWindowServiceLocation = new ServiceLocation
 			{
 				Location = new Uri("http://localhost:5678")
@@ -73,28 +68,25 @@ namespace ScheduleWebApiRefitApiTests
 				.RespondWith(
 					Response.Create().WithSuccess().WithBodyAsJson(maintenanceWindows));
 
-			var result = await scheduleWebAPi.CreateScheduleAsync(workloadItems);
+			var workloadItems = new List<WorkloadItem>
+			{
+				Any.InstanceOf<WorkloadItem>(),
+				Any.InstanceOf<WorkloadItem>()
+			};
+			var createScheduleRequest = new CreateScheduleRequest
+			{
+				WorkloadItems = workloadItems
+			};
 
-			result.Should().NotBe(Guid.Empty);
+			var result = await scheduleWebApiClient.PostAsync(createScheduleRequest).ConfigureAwait(false);
+
+			result.Id.Should().NotBe(Guid.Empty);
 		}
 
 		[Fact]
 		public async Task ShouldRetrieveCreatedSchedule()
 		{
-			var scheduleWebAPi = RestService.For<IScheduleWebApi>(ScheduleWebApiBaseUrl);
-			var workloadItems = new List<WorkloadItem>
-			{
-				new WorkloadItem
-				{
-					Identifier = Guid.NewGuid(),
-					DurationInHours = 7
-				},
-				new WorkloadItem
-				{
-					Identifier = Guid.NewGuid(),
-					DurationInHours = 3
-				}
-			};
+			var scheduleWebApiClient = new JsonServiceClient(ScheduleWebApiBaseUrl);
 
 			var maintenanceWindowServiceLocation = new ServiceLocation
 			{
@@ -114,14 +106,36 @@ namespace ScheduleWebApiRefitApiTests
 				.RespondWith(
 					Response.Create().WithSuccess().WithBodyAsJson(maintenanceWindows));
 
-			var scheduleId = await scheduleWebAPi.CreateScheduleAsync(workloadItems);
+			var workloadItems = new List<WorkloadItem>
+			{
+				new WorkloadItem
+				{
+					Identifier = Guid.NewGuid(),
+					DurationInHours = 7
+				},
+				new WorkloadItem
+				{
+					Identifier = Guid.NewGuid(),
+					DurationInHours = 3
+				}
+			};
+			var createScheduleRequest = new CreateScheduleRequest
+			{
+				WorkloadItems = workloadItems
+			};
 
-			var result = await scheduleWebAPi.GetScheduleByIdAsync(scheduleId);
+			var createScheduleResponse = await scheduleWebApiClient.PostAsync(createScheduleRequest).ConfigureAwait(false);
 
-			result.Count.Should().Be(2);
-			result.Should().Contain(x => x.Identifier == workloadItems[0].Identifier &&
+			var getScheduleByIdRequest = new GetScheduleByIdRequest
+			{
+				ScheduleId = createScheduleResponse.Id
+			};
+			var getScheduleByIdResponse = await scheduleWebApiClient.GetAsync(getScheduleByIdRequest).ConfigureAwait(false);
+
+			getScheduleByIdResponse.Schedule.Count.Should().Be(2);
+			getScheduleByIdResponse.Schedule.Should().Contain(x => x.Identifier == workloadItems[0].Identifier &&
 			                             x.Order == 2);
-			result.Should().Contain(x => x.Identifier == workloadItems[1].Identifier &&
+			getScheduleByIdResponse.Schedule.Should().Contain(x => x.Identifier == workloadItems[1].Identifier &&
 			                             x.Order == 1);
 		}
 

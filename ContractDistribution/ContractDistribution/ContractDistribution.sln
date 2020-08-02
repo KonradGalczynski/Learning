@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScheduleWebApiRefitContract
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScheduleWebApiRefitApiTests", "ScheduleWebApiRefitApiTests\ScheduleWebApiRefitApiTests.csproj", "{1BB8532A-84BE-45A7-825B-24D70047ABC0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScheduleWebApiServiceStackContract", "ScheduleWebApiServiceStackContract\ScheduleWebApiServiceStackContract.csproj", "{DAFCE896-E6A1-4AC5-8E42-1323E32FBDE2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScheduleWebApiServiceStackContract", "ScheduleWebApiServiceStackContract\ScheduleWebApiServiceStackContract.csproj", "{DAFCE896-E6A1-4AC5-8E42-1323E32FBDE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContractDistributionServiceStack", "ContractDistributionServiceStack\ContractDistributionServiceStack.csproj", "{7CABD81B-8668-46B4-94BD-10C6DCC4541B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContractDistributionServiceStack", "ContractDistributionServiceStack\ContractDistributionServiceStack.csproj", "{7CABD81B-8668-46B4-94BD-10C6DCC4541B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScheduleWebApiServiceStackApiTests", "ScheduleWebApiServiceStackApiTests\ScheduleWebApiServiceStackApiTests.csproj", "{99BC0F7E-1214-4BAB-925B-E658606E360F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{7CABD81B-8668-46B4-94BD-10C6DCC4541B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7CABD81B-8668-46B4-94BD-10C6DCC4541B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7CABD81B-8668-46B4-94BD-10C6DCC4541B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99BC0F7E-1214-4BAB-925B-E658606E360F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99BC0F7E-1214-4BAB-925B-E658606E360F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99BC0F7E-1214-4BAB-925B-E658606E360F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99BC0F7E-1214-4BAB-925B-E658606E360F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

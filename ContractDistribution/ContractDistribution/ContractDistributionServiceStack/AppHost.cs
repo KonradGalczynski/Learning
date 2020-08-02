@@ -7,7 +7,7 @@ namespace ContractDistributionServiceStack
 	public class AppHost : AppHostBase
 	{
 		public AppHost()
-			: base("Schedule Service Example", typeof(ScheduleService).Assembly) { }
+			: base("ContractDistributionServiceStack", typeof(ScheduleService).Assembly) { }
 
 		public override void Configure(Container container)
 		{
@@ -17,5 +17,5 @@ namespace ContractDistributionServiceStack
 				DebugMode = AppSettings.Get(nameof(HostConfig.DebugMode), false)
 			});
 		}
-	}
+    }
 }
