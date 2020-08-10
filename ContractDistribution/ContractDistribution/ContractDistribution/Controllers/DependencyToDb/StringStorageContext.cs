@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace ContractDistributionNetCoreWebApi
+namespace ContractDistributionNetCoreWebApi.Controllers.DependencyToDb
 {
 	public class StringStorageContext : DbContext
 	{
@@ -9,6 +9,8 @@ namespace ContractDistributionNetCoreWebApi
 		{
 		}
 
-		public DbSet<string> Item { get; set; }
+		public DbSet<Record> Record { get; set; }
+
+
 	}
 }

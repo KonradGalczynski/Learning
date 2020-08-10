@@ -1,6 +1,8 @@
+using ContractDistributionNetCoreWebApi.Controllers.DependencyToDb;
 using ContractDistributionNetCoreWebApi.Controllers.Schedule;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -49,16 +51,5 @@ namespace ContractDistributionNetCoreWebApi
 			app.UseOpenApi();
 			app.UseSwaggerUi3();
 		}
-	}
-
-	public class StringStorageContext : DbContext
-	{
-		public StringStorageContext(
-			DbContextOptions<RazorPagesMovieContext> options)
-			: base(options)
-		{
-		}
-
-		public DbSet<string> Item { get; set; }
 	}
 }
