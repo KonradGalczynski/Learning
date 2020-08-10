@@ -1,8 +1,8 @@
-using ContractDistributionServiceStack.Services;
+using ContractDistributionServiceStackWebApi.Services.Schedule;
 using Funq;
 using ServiceStack;
 
-namespace ContractDistributionServiceStack
+namespace ContractDistributionServiceStackWebApi
 {
 	public class AppHost : AppHostBase
 	{

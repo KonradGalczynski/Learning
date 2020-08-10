@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ContractDistributionServiceStack.Services
+namespace ContractDistributionServiceStackWebApi.Services
 {
 	public class ServiceLocation
 	{

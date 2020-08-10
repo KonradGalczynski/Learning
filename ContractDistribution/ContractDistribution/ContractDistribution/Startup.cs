@@ -1,11 +1,11 @@
-using ContractDistributionRefit.Controllers;
+using ContractDistributionNetCoreWebApi.Controllers.Schedule;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace ContractDistributionRefit
+namespace ContractDistributionNetCoreWebApi
 {
 	public class Startup
 	{
@@ -23,6 +23,8 @@ namespace ContractDistributionRefit
 			services.AddHttpClient();
 			services.AddSingleton<IScheduleStorage, ScheduleStorage>();
 			services.AddSwaggerDocument();
+			services.AddDbContext<StringStorageContext>(options =>
+				options.UseSqlServer(Configuration.GetConnectionString("StringStorageContext")));
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -47,5 +49,16 @@ namespace ContractDistributionRefit
 			app.UseOpenApi();
 			app.UseSwaggerUi3();
 		}
+	}
+
+	public class StringStorageContext : DbContext
+	{
+		public StringStorageContext(
+			DbContextOptions<RazorPagesMovieContext> options)
+			: base(options)
+		{
+		}
+
+		public DbSet<string> Item { get; set; }
 	}
 }

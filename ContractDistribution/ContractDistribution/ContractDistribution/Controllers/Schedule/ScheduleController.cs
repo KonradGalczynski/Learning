@@ -1,26 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using ScheduleWebApiServiceStackContract;
-using ServiceStack;
+using ScheduleWebApiRefitContract;
 
-namespace ContractDistributionServiceStack.Services
+namespace ContractDistributionNetCoreWebApi.Controllers.Schedule
 {
-	public class ScheduleService : Service
+	[ApiController]
+	[Route("api/schedule")]
+	public class ScheduleController : ControllerBase
 	{
 		private readonly IConfiguration _configuration;
 		private readonly IHttpClientFactory _httpClientFactory;
-		private readonly ILogger<ScheduleService> _logger;
+		private readonly ILogger<ScheduleController> _logger;
 		private readonly IScheduleStorage _scheduleStorage;
 
-		public ScheduleService(IConfiguration configuration,
+		public ScheduleController(IConfiguration configuration,
 			IHttpClientFactory httpClientFactory,
 			IScheduleStorage scheduleStorage,
-			ILogger<ScheduleService> logger)
+			ILogger<ScheduleController> logger)
 		{
 			_configuration = configuration;
 			_httpClientFactory = httpClientFactory;
@@ -28,7 +31,8 @@ namespace ContractDistributionServiceStack.Services
 			_logger = logger;
 		}
 
-		public async Task<object> Post(CreateScheduleRequest request)
+		[HttpPost]
+		public async Task<Guid> CreateSchedule(List<WorkloadItem> workloadItems)
 		{
 			_logger.LogInformation("Create schedule requested.");
 			using var httpClient = _httpClientFactory.CreateClient();
@@ -40,14 +44,10 @@ namespace ContractDistributionServiceStack.Services
 			var plannedMaintenanceWindowResponse = await httpClient.SendAsync(getPlannedMaintenanceWindowRequest).ConfigureAwait(false);
 			var plannedMaintenanceWindow =
 				JsonConvert.DeserializeObject<MaintenanceWindow>(await plannedMaintenanceWindowResponse.Content.ReadAsStringAsync().ConfigureAwait(false));
-			var response = new CreateScheduleResponse
-			{
-				Id = await _scheduleStorage.SaveScheduleAsync(CalculateScheduleFor(request.WorkloadItems, plannedMaintenanceWindow))
-			};
-			return response;
+			return await _scheduleStorage.SaveScheduleAsync(CalculateScheduleFor(workloadItems, plannedMaintenanceWindow));
 		}
 
-		private static List<ScheduleEntry> CalculateScheduleFor(List<WorkloadItem> workloadItems,
+		private static List<ScheduleEntry> CalculateScheduleFor(IEnumerable<WorkloadItem> workloadItems, 
 			MaintenanceWindow plannedMaintenanceWindow)
 		{
 			return workloadItems.Select(x => new ScheduleEntry
@@ -57,15 +57,12 @@ namespace ContractDistributionServiceStack.Services
 			}).ToList();
 		}
 
-		public object Get(GetScheduleByIdRequest request)
+		[HttpGet("{scheduleId}")]
+		public List<ScheduleEntry> GetScheduleById(Guid scheduleId)
 		{
 			_logger.LogInformation("Get schedule requested.");
 
-			var response = new GetScheduleByIdResponse
-			{
-				Schedule = _scheduleStorage.ReadSchedule(request.ScheduleId)
-			};
-			return response;
+			return _scheduleStorage.ReadSchedule(scheduleId);
 		}
 	}
 }

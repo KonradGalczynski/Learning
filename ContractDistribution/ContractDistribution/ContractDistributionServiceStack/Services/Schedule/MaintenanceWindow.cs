@@ -1,4 +1,4 @@
-﻿namespace ContractDistributionRefit.Controllers
+﻿namespace ContractDistributionServiceStackWebApi.Services.Schedule
 {
 	public class MaintenanceWindow
 	{

@@ -1,8 +1,7 @@
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using ServiceStack;
 
-namespace ContractDistributionServiceStack
+namespace ContractDistributionServiceStackWebApi
 {
 	public class Program
 	{

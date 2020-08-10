@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using ContractDistributionNetCoreWebApi;
@@ -9,23 +10,22 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Refit;
-using ScheduleWebApiRefitContract;
+using OpenApiSheduleApiClient;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 using Xunit;
 using static TddXt.AnyRoot.Root;
 
-namespace ScheduleWebApiRefitTests
+namespace ScheduleWebApiOpenApiTests
 {
-	public class ScheduleApiRefitTests : IDisposable
+	public class ScheduleApiOpenApiTests : IDisposable
 	{
 		private readonly CancellationTokenSource _cts;
 		private readonly WireMockServer _mockServer;
 		private const string ScheduleWebApiBaseUrl = "http://localhost:3333";
 
-		public ScheduleApiRefitTests()
+		public ScheduleApiOpenApiTests()
 		{
 			string[] args = { };
 			_cts = new CancellationTokenSource();
@@ -52,13 +52,12 @@ namespace ScheduleWebApiRefitTests
 		[Fact]
 		public async Task ShouldCreateScheduleWhenRequested()
 		{
-			var scheduleWebAPi = RestService.For<IScheduleWebApi>(ScheduleWebApiBaseUrl);
 			var workloadItems = new List<WorkloadItem>
 			{
 				Any.Instance<WorkloadItem>(),
 				Any.Instance<WorkloadItem>()
 			};
-			
+
 			var maintenanceWindowServiceLocation = new ServiceLocation
 			{
 				Location = new Uri("http://localhost:5678")
@@ -67,14 +66,20 @@ namespace ScheduleWebApiRefitTests
 				Request.Create().UsingGet().WithPath("/MaintenanceWindowService"))
 				.RespondWith(
 					Response.Create().WithSuccess().WithBodyAsJson(maintenanceWindowServiceLocation));
-			
+
 			var maintenanceWindows = Any.Instance<MaintenanceWindow>();
 			_mockServer.Given(
 				Request.Create().UsingGet().WithPath("/Planned"))
 				.RespondWith(
 					Response.Create().WithSuccess().WithBodyAsJson(maintenanceWindows));
 
-			var result = await scheduleWebAPi.CreateScheduleAsync(workloadItems);
+			var httpClient = new HttpClient();
+			var scheduleWebApiClient = new ScheduleClient(httpClient)
+			{
+				BaseUrl = ScheduleWebApiBaseUrl
+			};
+
+			var result = await scheduleWebApiClient.CreateScheduleAsync(workloadItems);
 
 			result.Should().NotBe(Guid.Empty);
 		}
@@ -82,7 +87,6 @@ namespace ScheduleWebApiRefitTests
 		[Fact]
 		public async Task ShouldRetrieveCreatedSchedule()
 		{
-			var scheduleWebAPi = RestService.For<IScheduleWebApi>(ScheduleWebApiBaseUrl);
 			var workloadItems = new List<WorkloadItem>
 			{
 				new WorkloadItem
@@ -115,15 +119,21 @@ namespace ScheduleWebApiRefitTests
 				.RespondWith(
 					Response.Create().WithSuccess().WithBodyAsJson(maintenanceWindows));
 
-			var scheduleId = await scheduleWebAPi.CreateScheduleAsync(workloadItems);
+			var httpClient = new HttpClient();
+			var scheduleWebApiClient = new ScheduleClient(httpClient)
+			{
+				BaseUrl = ScheduleWebApiBaseUrl
+			};
 
-			var result = await scheduleWebAPi.GetScheduleByIdAsync(scheduleId);
+			var scheduleId = await scheduleWebApiClient.CreateScheduleAsync(workloadItems);
+
+			var result = await scheduleWebApiClient.GetScheduleByIdAsync(scheduleId);
 
 			result.Count.Should().Be(2);
 			result.Should().Contain(x => x.Identifier == workloadItems[0].Identifier &&
-			                             x.Order == 2);
+										 x.Order == 2);
 			result.Should().Contain(x => x.Identifier == workloadItems[1].Identifier &&
-			                             x.Order == 1);
+										 x.Order == 1);
 		}
 
 		public void Dispose()

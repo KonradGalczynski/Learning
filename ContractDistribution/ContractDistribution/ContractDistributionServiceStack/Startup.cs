@@ -1,11 +1,12 @@
-using ContractDistributionServiceStack.Services;
+using ContractDistributionServiceStackWebApi.Services;
+using ContractDistributionServiceStackWebApi.Services.Schedule;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ServiceStack;
 
-namespace ContractDistributionServiceStack
+namespace ContractDistributionServiceStackWebApi
 {
 	public class Startup : ModularStartup
 	{

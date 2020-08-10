@@ -2,21 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using ContractDistributionServiceStack;
-using ContractDistributionServiceStack.Services;
+using ContractDistributionServiceStackWebApi;
+using ContractDistributionServiceStackWebApi.Services;
+using ContractDistributionServiceStackWebApi.Services.Schedule;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using ScheduleWebApiServiceStackContract;
 using ServiceStack;
-using TddEbook.TddToolkit;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 using Xunit;
+using static TddXt.AnyRoot.Root;
 
-namespace ScheduleWebApiServiceStackApiTests
+namespace ScheduleWebApiServiceStackTests
 {
 	public class ScheduleApiServiceStackTests : IDisposable
 	{
@@ -62,7 +63,7 @@ namespace ScheduleWebApiServiceStackApiTests
 				.RespondWith(
 					Response.Create().WithSuccess().WithBodyAsJson(maintenanceWindowServiceLocation));
 			
-			var maintenanceWindows = Any.InstanceOf<MaintenanceWindow>();
+			var maintenanceWindows = Any.Instance<MaintenanceWindow>();
 			_mockServer.Given(
 				Request.Create().UsingGet().WithPath("/Planned"))
 				.RespondWith(
@@ -70,8 +71,8 @@ namespace ScheduleWebApiServiceStackApiTests
 
 			var workloadItems = new List<WorkloadItem>
 			{
-				Any.InstanceOf<WorkloadItem>(),
-				Any.InstanceOf<WorkloadItem>()
+				Any.Instance<WorkloadItem>(),
+				Any.Instance<WorkloadItem>()
 			};
 			var createScheduleRequest = new CreateScheduleRequest
 			{

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ContractDistributionRefit.Controllers
+namespace ContractDistributionNetCoreWebApi.Controllers
 {
 	public class ServiceLocation
 	{

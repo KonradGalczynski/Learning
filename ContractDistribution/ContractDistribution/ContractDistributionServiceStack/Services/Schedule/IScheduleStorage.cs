@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ScheduleWebApiServiceStackContract;
 
-namespace ContractDistributionServiceStack.Services
+namespace ContractDistributionServiceStackWebApi.Services.Schedule
 {
 	public interface IScheduleStorage
 	{

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ScheduleWebApiRefitContract;
+using ScheduleWebApiServiceStackContract;
 
-namespace ContractDistributionRefit.Controllers
+namespace ContractDistributionServiceStackWebApi.Services.Schedule
 {
 	public class ScheduleStorage : IScheduleStorage
 	{

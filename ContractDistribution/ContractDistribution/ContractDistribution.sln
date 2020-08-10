@@ -3,17 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30309.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContractDistributionRefit", "ContractDistribution\ContractDistributionRefit.csproj", "{48932843-33BC-40AF-A81C-5DCF4020803F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContractDistributionNetCoreWebApi", "ContractDistribution\ContractDistributionNetCoreWebApi.csproj", "{48932843-33BC-40AF-A81C-5DCF4020803F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScheduleWebApiRefitContract", "ScheduleWebApiRefitContract\ScheduleWebApiRefitContract.csproj", "{0C708596-A4BD-4780-B1B8-28D856647432}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScheduleWebApiRefitApiTests", "ScheduleWebApiRefitApiTests\ScheduleWebApiRefitApiTests.csproj", "{1BB8532A-84BE-45A7-825B-24D70047ABC0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScheduleWebApiRefitTests", "ScheduleWebApiRefitApiTests\ScheduleWebApiRefitTests.csproj", "{1BB8532A-84BE-45A7-825B-24D70047ABC0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScheduleWebApiServiceStackContract", "ScheduleWebApiServiceStackContract\ScheduleWebApiServiceStackContract.csproj", "{DAFCE896-E6A1-4AC5-8E42-1323E32FBDE2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContractDistributionServiceStack", "ContractDistributionServiceStack\ContractDistributionServiceStack.csproj", "{7CABD81B-8668-46B4-94BD-10C6DCC4541B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContractDistributionServiceStackWebApi", "ContractDistributionServiceStack\ContractDistributionServiceStackWebApi.csproj", "{7CABD81B-8668-46B4-94BD-10C6DCC4541B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScheduleWebApiServiceStackApiTests", "ScheduleWebApiServiceStackApiTests\ScheduleWebApiServiceStackApiTests.csproj", "{99BC0F7E-1214-4BAB-925B-E658606E360F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScheduleWebApiServiceStackTests", "ScheduleWebApiServiceStackApiTests\ScheduleWebApiServiceStackTests.csproj", "{99BC0F7E-1214-4BAB-925B-E658606E360F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScheduleWebApiOpenApiTests", "ScheduleWebApiOpenApiTests\ScheduleWebApiOpenApiTests.csproj", "{D9ED3A77-3436-4346-8D80-BF37B57EF524}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{99BC0F7E-1214-4BAB-925B-E658606E360F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99BC0F7E-1214-4BAB-925B-E658606E360F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99BC0F7E-1214-4BAB-925B-E658606E360F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9ED3A77-3436-4346-8D80-BF37B57EF524}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9ED3A77-3436-4346-8D80-BF37B57EF524}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9ED3A77-3436-4346-8D80-BF37B57EF524}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9ED3A77-3436-4346-8D80-BF37B57EF524}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
