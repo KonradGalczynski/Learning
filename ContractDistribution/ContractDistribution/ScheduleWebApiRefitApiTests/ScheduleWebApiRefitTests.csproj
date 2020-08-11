@@ -10,6 +10,7 @@
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.6" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.2.0-rc.1" />
     <PackageReference Include="Refit.HttpClientFactory" Version="5.1.67" />
     <PackageReference Include="Any" Version="4.3.0" />
     <PackageReference Include="WireMock.Net" Version="1.2.15" />

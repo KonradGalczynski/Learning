@@ -16,8 +16,8 @@ namespace ContractDistributionNetCoreWebApi.Controllers.DependencyToDb
 			_context = context;
 		}
 		
-		   [HttpPost]
-		public async Task<string> SaveStringAsync(string item)
+		[HttpPost]
+		public async Task<string> SaveItemAsync(string item)
 		{
 			var record = new Record
 			{
@@ -29,10 +29,10 @@ namespace ContractDistributionNetCoreWebApi.Controllers.DependencyToDb
 			return record.Id;
 		}
 		
-		[HttpGet("{stringId}")]
-		public async Task<string> GetStringAsync(string stringId)
+		[HttpGet("{itemId}")]
+		public async Task<string> GetItemAsync(string itemId)
 		{
-			var element = await _context.Record.FirstOrDefaultAsync(x => x.Id == stringId);
+			var element = await _context.Record.FirstOrDefaultAsync(x => x.Id == itemId);
 			return element.Item;
 		}
 	}
