@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ContractDistributionNetCoreWebApi;
@@ -131,6 +132,28 @@ namespace ScheduleWebApiRefitTests
 			_cts.Cancel();
 			_mockServer.Stop();
 			_mockServer.Dispose();
+		}
+
+		[Fact]
+		public async Task ShouldReturnEmptyScheduleWhenScheduleIsCalculatedWithEmptyItemsList()
+		{
+			var uut = new ScheduleCalculator();
+			var items = Enumerable.Empty<Item>();
+
+			var schedule = await uut.CalculateAsync(items);
+
+			schedule.Should().BeEmpty();
+		}
+	}
+
+	public class Item
+	{
+	}
+
+	public class ScheduleCalculator
+	{
+		public async Task<IEnumerable<ScheduleEntry>> CalculateAsync(IEnumerable<Item> items)
+		{
 		}
 	}
 }
