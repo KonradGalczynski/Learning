@@ -9,7 +9,7 @@
 		}
 	},
 	"profiles": {
-		"ContractDistributionServiceStack": {
+		"ContractDistributionServiceStackWebApi": {
 			"commandName": "Project",
 			"launchBrowser": true,
 			"launchUrl": "metadata",

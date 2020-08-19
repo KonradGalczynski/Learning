@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace ContractDistributionNetCoreWebApi.Controllers.DependencyToDb
+namespace ContractDistributionAspNetCoreWebApi.Controllers.DependencyToDb
 {
 	public class StringStorageContext : DbContext
 	{

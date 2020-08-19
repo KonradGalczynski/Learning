@@ -1,4 +1,4 @@
-﻿namespace ContractDistributionNetCoreWebApi.Controllers.Schedule
+﻿namespace ContractDistributionAspNetCoreWebApi.Controllers.Schedule
 {
 	public class MaintenanceWindow
 	{

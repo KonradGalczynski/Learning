@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ScheduleWebApiRefitContract;
 
-namespace ContractDistributionNetCoreWebApi.Controllers.Schedule
+namespace ContractDistributionOpenApiWebApi.Controllers.Schedule
 {
 	public interface IScheduleStorage
 	{

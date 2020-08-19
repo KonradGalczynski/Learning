@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ContractDistribution\ContractDistributionNetCoreWebApi.csproj" />
+    <ProjectReference Include="..\ContractDistributionAspNetCore\ContractDistributionAspNetCoreWebApi.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using ContractDistributionNetCoreWebApi;
+using ContractDistributionAspNetCoreWebApi;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -52,10 +52,10 @@ namespace ScheduleWebApiRefitTests
 		[Fact]
 		public async Task ShouldPublishMessage()
 		{
-			var dbDependencySample = RestService.For<IRabbitMqDependencySample>(RabbitMqDependencySampleBaseUrl);
+			var rabbitMqDependencySample = RestService.For<IRabbitMqDependencySample>(RabbitMqDependencySampleBaseUrl);
 			var message = Any.String();
 
-			await dbDependencySample.PublishMessageAsync(message);
+			await rabbitMqDependencySample.PublishMessageAsync(message);
 
 			Thread.Sleep(5000);
 			AssertMessageReceived(message);

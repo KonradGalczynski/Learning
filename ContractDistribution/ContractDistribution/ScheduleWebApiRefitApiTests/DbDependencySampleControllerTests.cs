@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using ContractDistributionNetCoreWebApi;
+using ContractDistributionAspNetCoreWebApi;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Data.SqlClient;

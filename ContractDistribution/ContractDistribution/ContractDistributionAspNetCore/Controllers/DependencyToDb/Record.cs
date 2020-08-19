@@ -1,6 +1,4 @@
-using System;
-
-namespace ContractDistributionNetCoreWebApi.Controllers.DependencyToDb
+namespace ContractDistributionAspNetCoreWebApi.Controllers.DependencyToDb
 {
 	public class Record
 	{

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using RabbitMQ.Client;
 
-namespace ContractDistributionNetCoreWebApi.Controllers.DependencyToRabbitMq
+namespace ContractDistributionAspNetCoreWebApi.Controllers.DependencyToRabbitMq
 {
 	[ApiController]
 	[Route("api/rabbitmq")]

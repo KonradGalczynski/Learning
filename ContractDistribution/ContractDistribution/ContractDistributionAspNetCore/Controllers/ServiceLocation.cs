@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ContractDistributionNetCoreWebApi.Controllers
+namespace ContractDistributionAspNetCoreWebApi.Controllers
 {
 	public class ServiceLocation
 	{

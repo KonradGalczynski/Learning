@@ -1,5 +1,5 @@
-using ContractDistributionNetCoreWebApi.Controllers.DependencyToDb;
-using ContractDistributionNetCoreWebApi.Controllers.Schedule;
+using ContractDistributionAspNetCoreWebApi.Controllers.DependencyToDb;
+using ContractDistributionAspNetCoreWebApi.Controllers.Schedule;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace ContractDistributionNetCoreWebApi
+namespace ContractDistributionAspNetCoreWebApi
 {
 	public class Startup
 	{
@@ -24,7 +24,6 @@ namespace ContractDistributionNetCoreWebApi
 			services.AddControllers();
 			services.AddHttpClient();
 			services.AddSingleton<IScheduleStorage, ScheduleStorage>();
-			services.AddSwaggerDocument();
 			services.AddDbContext<StringStorageContext>(options =>
 				options.UseSqlServer(Configuration.GetConnectionString("StringStorageContext")));
 		}
@@ -47,9 +46,6 @@ namespace ContractDistributionNetCoreWebApi
 			{
 				endpoints.MapControllers();
 			});
-
-			app.UseOpenApi();
-			app.UseSwaggerUi3();
 		}
 	}
 }

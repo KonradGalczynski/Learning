@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace ContractDistributionNetCoreWebApi.Controllers.DependencyToDb
+namespace ContractDistributionAspNetCoreWebApi.Controllers.DependencyToDb
 {
 	[ApiController]
 	[Route("api/db")]

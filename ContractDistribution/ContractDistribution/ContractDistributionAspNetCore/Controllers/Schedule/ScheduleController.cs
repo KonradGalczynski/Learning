@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ScheduleWebApiRefitContract;
 
-namespace ContractDistributionNetCoreWebApi.Controllers.Schedule
+namespace ContractDistributionAspNetCoreWebApi.Controllers.Schedule
 {
 	[ApiController]
 	[Route("api/schedule")]
